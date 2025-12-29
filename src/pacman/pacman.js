@@ -6,18 +6,6 @@ const tileSize = 32
 const boardWidth = colCount * tileSize
 const boardHeight = rowCount * tileSize
 
-const ASSET_PATHS = {
-  wall: './wall.png',
-  ghostBlue: './blueGhost.png',
-  ghostOrange: './orangeGhost.png',
-  ghostPink: './pinkGhost.png',
-  ghostRed: './redGhost.png',
-  pacmanUp: './pacmanUp.png',
-  pacmanDown: './pacmanDown.png',
-  pacmanLeft: './pacmanLeft.png',
-  pacmanRight: './pacmanRight.png',
-}
-
 const images = {}
 
 window.onload = async () => {
@@ -26,9 +14,58 @@ window.onload = async () => {
   board.width = boardWidth
   context = board.getContext('2d')
 
-  await loadImages()
+  Object.assign(images, await loadImages())
   console.log('✅ Images loaded')
+
+  drawBoard()
+
+  update()
 }
+
+// TODO: try this out
+const ASSETS = {
+  Wall: {
+    name: 'wall',
+    path: './assets/wall.png',
+    tileKey: 'w',
+  },
+}
+
+const ASSET_PATHS = {
+  wall: './assets/wall.png',
+  ghostBlue: './assets/blueGhost.png',
+  ghostOrange: './assets/orangeGhost.png',
+  ghostPink: './assets/pinkGhost.png',
+  ghostRed: './assets/redGhost.png',
+  pacmanUp: './assets/pacmanUp.png',
+  pacmanDown: './assets/pacmanDown.png',
+  pacmanLeft: './assets/pacmanLeft.png',
+  pacmanRight: './assets/pacmanRight.png',
+}
+
+const TILE_MAP = [
+  'xxxxxxxxxxxxxxxxxxx',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'x                 x',
+  'xxxxxxxxxxxxxxxxxxx',
+]
 
 /** Utilities **/
 async function loadImages() {
@@ -49,4 +86,43 @@ function loadImage(src) {
     img.onerror = () => reject(new Error(`Failed to load image: ${src}`))
     img.src = src
   })
+}
+
+function update() {
+  draw()
+}
+
+function draw() {
+  console.log(images)
+  context.drawImage(images.pacmanUp, 200, 200, 32, 32)
+}
+
+function drawBoard() {
+  for (let row = 0; row < TILE_MAP.length; row++) {
+    for (let col = 0; col < TILE_MAP[col].length; col++) {
+      const x = col * tileSize
+      const y = row * tileSize
+      const char = TILE_MAP[row][col]
+
+      if (char === 'x') {
+        const wall = new Block(images.wall, x, y, tileSize, tileSize)
+        // TODO: Add wall to walls entities
+      }
+    }
+  }
+}
+
+class Block {
+  constructor(image, x, y, w, h) {
+    this.image = image
+    this.x = x
+    this.y = y
+    this.w = w
+    this.h = h
+
+    this.startX = x
+    this.startY = y
+  }
+
+  draw() {}
 }
