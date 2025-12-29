@@ -6,7 +6,12 @@ const tileSize = 32
 const boardWidth = colCount * tileSize
 const boardHeight = rowCount * tileSize
 
+const walls = new Set()
+const enemies = new Set()
+let player
+
 const images = {}
+const assetsMap = {}
 
 window.onload = async () => {
   board = document.getElementById('board')
@@ -15,20 +20,31 @@ window.onload = async () => {
   context = board.getContext('2d')
 
   Object.assign(images, await loadImages())
-  console.log('✅ Images loaded')
+  Object.assign(assetsMap, {
+    X: {
+      image: images.wall,
+      target: walls,
+    },
+    o: {
+      image: images.ghostOrange,
+      target: enemies,
+    },
+    p: {
+      image: images.ghostPink,
+      target: enemies,
+    },
+    r: {
+      image: images.ghostRed,
+      target: enemies,
+    },
+    b: {
+      image: images.ghostBlue,
+      target: enemies,
+    },
+  })
 
   drawBoard()
-
   update()
-}
-
-// TODO: try this out
-const ASSETS = {
-  Wall: {
-    name: 'wall',
-    path: './assets/wall.png',
-    tileKey: 'w',
-  },
 }
 
 const ASSET_PATHS = {
@@ -44,27 +60,27 @@ const ASSET_PATHS = {
 }
 
 const TILE_MAP = [
-  'xxxxxxxxxxxxxxxxxxx',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'x                 x',
-  'xxxxxxxxxxxxxxxxxxx',
+  'XXXXXXXXXXXXXXXXXXX',
+  'X        X        X',
+  'X XX XXX X XXX XX X',
+  'X                 X',
+  'X XX X XXXXX X XX X',
+  'X    X       X    X',
+  'XXXX XXXX XXXX XXXX',
+  'OOOX X       X XOOO',
+  'XXXX X XXrXX X XXXX',
+  'O       bpo       O',
+  'XXXX X XXXXX X XXXX',
+  'OOOX X       X XOOO',
+  'XXXX X XXXXX X XXXX',
+  'X        X        X',
+  'X XX XXX X XXX XX X',
+  'X  X     P     X  X',
+  'XX X X XXXXX X X XX',
+  'X    X   X   X    X',
+  'X XXXXXX X XXXXXX X',
+  'X                 X',
+  'XXXXXXXXXXXXXXXXXXX',
 ]
 
 /** Utilities **/
@@ -93,8 +109,24 @@ function update() {
 }
 
 function draw() {
-  console.log(images)
-  context.drawImage(images.pacmanUp, 200, 200, 32, 32)
+  // Draw the player
+  context.drawImage(
+    player.image,
+    player.x,
+    player.y,
+    player.width,
+    player.height
+  )
+
+  // Draw the enemies
+  for (const enemy of Array.from(enemies)) {
+    context.drawImage(enemy.image, enemy.x, enemy.y, enemy.width, enemy.height)
+  }
+
+  // Draw the walls
+  for (const wall of Array.from(walls)) {
+    context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height)
+  }
 }
 
 function drawBoard() {
@@ -104,25 +136,28 @@ function drawBoard() {
       const y = row * tileSize
       const char = TILE_MAP[row][col]
 
-      if (char === 'x') {
-        const wall = new Block(images.wall, x, y, tileSize, tileSize)
-        // TODO: Add wall to walls entities
+      if (char === 'P') {
+        player = new Block(images.pacmanRight, x, y, tileSize, tileSize)
       }
+
+      const handler = assetsMap[char]
+      if (!handler) continue
+
+      const entity = new Block(handler.image, x, y, tileSize, tileSize)
+      handler.target.add(entity)
     }
   }
 }
 
 class Block {
-  constructor(image, x, y, w, h) {
+  constructor(image, x, y, width, height) {
     this.image = image
     this.x = x
     this.y = y
-    this.w = w
-    this.h = h
+    this.width = width
+    this.height = height
 
     this.startX = x
     this.startY = y
   }
-
-  draw() {}
 }
