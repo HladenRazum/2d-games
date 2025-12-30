@@ -1,4 +1,5 @@
 import { config, DIRECTIONS } from './constants.js'
+import { isRectangleCollision } from './utils.js'
 
 export class Block {
   constructor(image, x, y, width, height) {
@@ -16,9 +17,23 @@ export class Block {
     this.velocityY = 0
   }
 
-  updateDirection(direction) {
+  updateDirection(direction, walls) {
+    const prevDirection = this.direction
+
     this.direction = direction
     this.updateVelocity()
+    this.x += this.velocityX
+    this.y += this.velocityY
+
+    for (const wall of walls.values()) {
+      if (isRectangleCollision(this, wall)) {
+        this.x -= this.velocityX
+        this.y -= this.velocityY
+        this.direction = prevDirection
+        this.updateVelocity()
+        return
+      }
+    }
   }
 
   updateVelocity() {

@@ -1,6 +1,6 @@
 import { Block } from './Block.js'
 import { config, DIRECTIONS } from './constants.js'
-import { loadImages } from './utils.js'
+import { isRectangleCollision, loadImages } from './utils.js'
 
 let context
 let board
@@ -91,12 +91,20 @@ const KEY_TO_DIRECTION = {
 
 function movePlayer(e) {
   const direction = KEY_TO_DIRECTION[e.code]
-  player.updateDirection(direction)
+  player.updateDirection(direction, walls)
 }
 
 function move() {
   player.x += player.velocityX
   player.y += player.velocityY
+
+  for (const wall of walls.values()) {
+    if (isRectangleCollision(player, wall)) {
+      player.x -= player.velocityX
+      player.y -= player.velocityY
+      break
+    }
+  }
 }
 
 function update() {
