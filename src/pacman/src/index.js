@@ -1,6 +1,10 @@
 import { Block } from './Block.js'
 import { config, DIRECTIONS } from './constants.js'
-import { isRectangleCollision, loadImages } from './utils.js'
+import {
+  getRandomDirection,
+  isRectangleCollision,
+  loadImages,
+} from './utils.js'
 
 let context
 let board
@@ -17,42 +21,6 @@ let player
 
 const images = {}
 const assetsMap = {}
-
-window.onload = async () => {
-  board = document.getElementById('board')
-  board.height = boardHeight
-  board.width = boardWidth
-  context = board.getContext('2d')
-
-  Object.assign(images, await loadImages())
-  Object.assign(assetsMap, {
-    X: {
-      image: images.wall,
-      target: walls,
-    },
-    o: {
-      image: images.ghostOrange,
-      target: enemies,
-    },
-    p: {
-      image: images.ghostPink,
-      target: enemies,
-    },
-    r: {
-      image: images.ghostRed,
-      target: enemies,
-    },
-    b: {
-      image: images.ghostBlue,
-      target: enemies,
-    },
-  })
-
-  drawBoard()
-  update()
-
-  document.addEventListener('keyup', movePlayer)
-}
 
 const TILE_MAP = [
   'XXXXXXXXXXXXXXXXXXX',
@@ -90,8 +58,16 @@ const KEY_TO_DIRECTION = {
 }
 
 function movePlayer(e) {
+  const DIRECTION_TO_PACMAN_IMAGE = {
+    [DIRECTIONS.Up]: images.pacmanUp,
+    [DIRECTIONS.Down]: images.pacmanDown,
+    [DIRECTIONS.Left]: images.pacmanLeft,
+    [DIRECTIONS.Right]: images.pacmanRight,
+  }
+
   const direction = KEY_TO_DIRECTION[e.code]
   player.updateDirection(direction, walls)
+  player.image = DIRECTION_TO_PACMAN_IMAGE[direction] || player.image
 }
 
 function move() {
@@ -105,6 +81,29 @@ function move() {
       break
     }
   }
+
+  for (const enemy of enemies.values()) {
+    enemy.x += enemy.velocityX
+    enemy.y += enemy.velocityY
+
+    // for (const wall of walls.values()) {
+    //   if (isRectangleCollision(enemy, wall)) {
+    //     // undo move
+    //     enemy.x -= enemy.velocityX
+    //     enemy.y -= enemy.velocityY
+
+    //     // pick a new random direction
+    //     enemy.direction = getRandomDirection(DIRECTIONS)
+    //     enemy.updateVelocity()
+    //     break
+    //   }
+    // }
+  }
+
+  // for (const enemy of enemies.values()) {
+  //   enemy.x += enemy.velocityX
+  //   enemy.y += enemy.velocityY
+  // }
 }
 
 function update() {
@@ -166,4 +165,45 @@ function drawBoard() {
       handler.target.add(entity)
     }
   }
+}
+
+window.onload = async () => {
+  board = document.getElementById('board')
+  board.height = boardHeight
+  board.width = boardWidth
+  context = board.getContext('2d')
+
+  Object.assign(images, await loadImages())
+  Object.assign(assetsMap, {
+    X: {
+      image: images.wall,
+      target: walls,
+    },
+    o: {
+      image: images.ghostOrange,
+      target: enemies,
+    },
+    p: {
+      image: images.ghostPink,
+      target: enemies,
+    },
+    r: {
+      image: images.ghostRed,
+      target: enemies,
+    },
+    b: {
+      image: images.ghostBlue,
+      target: enemies,
+    },
+  })
+
+  drawBoard()
+  update()
+
+  for (const enemy of enemies.values()) {
+    enemy.direction = getRandomDirection(DIRECTIONS)
+    enemy.updateVelocity()
+  }
+
+  document.addEventListener('keyup', movePlayer)
 }

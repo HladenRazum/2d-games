@@ -28,3 +28,10 @@ export function isRectangleCollision(a, b) {
     a.y + a.height > b.y
   )
 }
+
+export function getRandomDirection(directionsObj) {
+  const directions = Object.values(directionsObj)
+  const randomDirection =
+    directions[Math.floor(Math.random() * directions.length)]
+  return randomDirection
+}
