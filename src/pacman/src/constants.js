@@ -15,3 +15,10 @@ export const config = {
   colCount: 19,
   tileSize: 32,
 }
+
+export const DIRECTIONS = {
+  Left: 'L',
+  Right: 'R',
+  Up: 'U',
+  Down: 'D',
+}

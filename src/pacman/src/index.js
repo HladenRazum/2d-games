@@ -1,5 +1,5 @@
 import { Block } from './Block.js'
-import { config } from './constants.js'
+import { config, DIRECTIONS } from './constants.js'
 import { loadImages } from './utils.js'
 
 let context
@@ -50,6 +50,8 @@ window.onload = async () => {
 
   drawBoard()
   update()
+
+  document.addEventListener('keyup', movePlayer)
 }
 
 const TILE_MAP = [
@@ -76,11 +78,36 @@ const TILE_MAP = [
   'XXXXXXXXXXXXXXXXXXX',
 ]
 
+const KEY_TO_DIRECTION = {
+  ArrowUp: DIRECTIONS.Up,
+  KeyW: DIRECTIONS.Up,
+  ArrowDown: DIRECTIONS.Down,
+  KeyS: DIRECTIONS.Down,
+  ArrowLeft: DIRECTIONS.Left,
+  KeyA: DIRECTIONS.Left,
+  ArrowRight: DIRECTIONS.Right,
+  KeyD: DIRECTIONS.Right,
+}
+
+function movePlayer(e) {
+  const direction = KEY_TO_DIRECTION[e.code]
+  player.updateDirection(direction)
+}
+
+function move() {
+  player.x += player.velocityX
+  player.y += player.velocityY
+}
+
 function update() {
+  move()
   draw()
+  setTimeout(update, 50)
 }
 
 function draw() {
+  context.clearRect(0, 0, boardWidth, boardHeight)
+
   // Draw the player
   context.drawImage(
     player.image,
