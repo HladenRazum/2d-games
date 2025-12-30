@@ -8,6 +8,7 @@ const boardHeight = rowCount * tileSize
 
 const walls = new Set()
 const enemies = new Set()
+const food = new Set()
 let player
 
 const images = {}
@@ -127,6 +128,12 @@ function draw() {
   for (const wall of Array.from(walls)) {
     context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height)
   }
+
+  // Draw food
+  context.fillStyle = '#ffffff'
+  for (const f of food.values()) {
+    context.fillRect(f.x, f.y, f.width, f.height)
+  }
 }
 
 function drawBoard() {
@@ -138,6 +145,12 @@ function drawBoard() {
 
       if (char === 'P') {
         player = new Block(images.pacmanRight, x, y, tileSize, tileSize)
+        continue
+      }
+
+      if (char === ' ') {
+        const f = new Block(null, x + 14, y + 14, 4, 4)
+        food.add(f)
       }
 
       const handler = assetsMap[char]
