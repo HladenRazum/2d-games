@@ -1,8 +1,12 @@
+import { Block } from './Block.js'
+import { config } from './constants.js'
+import { loadImages } from './utils.js'
+
 let context
 let board
-const rowCount = 21
-const colCount = 19
-const tileSize = 32
+
+const { rowCount, colCount, tileSize } = config
+
 const boardWidth = colCount * tileSize
 const boardHeight = rowCount * tileSize
 
@@ -48,18 +52,6 @@ window.onload = async () => {
   update()
 }
 
-const ASSET_PATHS = {
-  wall: './assets/wall.png',
-  ghostBlue: './assets/blueGhost.png',
-  ghostOrange: './assets/orangeGhost.png',
-  ghostPink: './assets/pinkGhost.png',
-  ghostRed: './assets/redGhost.png',
-  pacmanUp: './assets/pacmanUp.png',
-  pacmanDown: './assets/pacmanDown.png',
-  pacmanLeft: './assets/pacmanLeft.png',
-  pacmanRight: './assets/pacmanRight.png',
-}
-
 const TILE_MAP = [
   'XXXXXXXXXXXXXXXXXXX',
   'X        X        X',
@@ -83,27 +75,6 @@ const TILE_MAP = [
   'X                 X',
   'XXXXXXXXXXXXXXXXXXX',
 ]
-
-/** Utilities **/
-async function loadImages() {
-  const entries = await Promise.all(
-    Object.entries(ASSET_PATHS).map(async ([key, src]) => [
-      key,
-      await loadImage(src),
-    ])
-  )
-
-  return Object.fromEntries(entries)
-}
-
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => resolve(img)
-    img.onerror = () => reject(new Error(`Failed to load image: ${src}`))
-    img.src = src
-  })
-}
 
 function update() {
   draw()
@@ -138,7 +109,7 @@ function draw() {
 
 function drawBoard() {
   for (let row = 0; row < TILE_MAP.length; row++) {
-    for (let col = 0; col < TILE_MAP[col].length; col++) {
+    for (let col = 0; col < TILE_MAP[row].length; col++) {
       const x = col * tileSize
       const y = row * tileSize
       const char = TILE_MAP[row][col]
@@ -159,18 +130,5 @@ function drawBoard() {
       const entity = new Block(handler.image, x, y, tileSize, tileSize)
       handler.target.add(entity)
     }
-  }
-}
-
-class Block {
-  constructor(image, x, y, width, height) {
-    this.image = image
-    this.x = x
-    this.y = y
-    this.width = width
-    this.height = height
-
-    this.startX = x
-    this.startY = y
   }
 }
