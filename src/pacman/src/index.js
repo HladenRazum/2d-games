@@ -6,13 +6,24 @@ import {
   loadImages,
 } from './utils.js'
 
+// TODO:
+const PLAYER_MODES = {
+  NORMAL: 'normal',
+  INVULNERABLE: 'invlulnerable',
+}
+
 let context
 let board
+let playerMode = PLAYER_MODES.NORMAL
+let numLifes = 2
+let isGameOver = numLifes <= 0
+let isPlaying = true
 
 const { rowCount, colCount, tileSize } = config
 
 const boardWidth = colCount * tileSize
 const boardHeight = rowCount * tileSize
+const playerStartingPosition = { x: boardWidth / 2, y: boardHeight / 2 }
 
 const walls = new Set()
 const enemies = new Set()
@@ -109,27 +120,55 @@ function move() {
         enemy.updateVelocity()
         break
       }
+
+      if (isRectangleCollision(enemy, player)) {
+        if (playerMode === PLAYER_MODES.NORMAL) {
+          player.x = playerStartingPosition.xl
+          player.y = playerStartingPosition.y
+          numLifes--
+          // TODO: Restart the level
+        } else if (playerMode === PLAYER_MODES.INVULNERABLE) {
+          // Increase the score
+          enemies.delete(enemy)
+        }
+        return
+      }
     }
   }
 }
 
 function update() {
+  if (!isPlaying) return
+
+  isGameOver = numLifes <= 0
+
   move()
   draw()
-  setTimeout(update, 50)
+
+  if (!isGameOver) {
+    setTimeout(update, 50)
+  } else {
+    showScore()
+  }
+}
+
+function showScore() {
+  context.fillStyle = '#70704c6d'
+  context.fillRect(0, 0, boardWidth, boardHeight)
+
+  context.fillStyle = '#0911efff'
+  context.fillRect(100, 200, boardWidth - 200, 200)
+
+  context.fillStyle = '#ddf601ff'
+  context.font = 'bold 32px monospace'
+  context.fillText('Game Over!', 150, 250)
+
+  context.font = 'normal 52px monospace'
+  context.fillText('Score: 3000', 150, 300)
 }
 
 function draw() {
   context.clearRect(0, 0, boardWidth, boardHeight)
-
-  // Draw the player
-  context.drawImage(
-    player.image,
-    player.x,
-    player.y,
-    player.width,
-    player.height
-  )
 
   // Draw the enemies
   for (const enemy of Array.from(enemies)) {
@@ -146,6 +185,15 @@ function draw() {
   for (const f of food.values()) {
     context.fillRect(f.x, f.y, f.width, f.height)
   }
+
+  // Draw the player
+  context.drawImage(
+    player.image,
+    player.x,
+    player.y,
+    player.width,
+    player.height
+  )
 }
 
 function drawBoard() {
