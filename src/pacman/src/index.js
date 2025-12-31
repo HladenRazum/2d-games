@@ -70,9 +70,21 @@ function movePlayer(e) {
   player.image = DIRECTION_TO_PACMAN_IMAGE[direction] || player.image
 }
 
+// Wrap the map vertically
+// If we exit the map from the one side, we teleport to the other side
+function wrapEntity(e) {
+  if (e.x + e.width < 0) {
+    e.x = boardWidth
+  } else if (e.x > boardWidth) {
+    e.x = -e.width
+  }
+}
+
 function move() {
   player.x += player.velocityX
   player.y += player.velocityY
+
+  wrapEntity(player)
 
   for (const wall of walls.values()) {
     if (isRectangleCollision(player, wall)) {
@@ -86,24 +98,19 @@ function move() {
     enemy.x += enemy.velocityX
     enemy.y += enemy.velocityY
 
-    // for (const wall of walls.values()) {
-    //   if (isRectangleCollision(enemy, wall)) {
-    //     // undo move
-    //     enemy.x -= enemy.velocityX
-    //     enemy.y -= enemy.velocityY
+    wrapEntity(enemy)
 
-    //     // pick a new random direction
-    //     enemy.direction = getRandomDirection(DIRECTIONS)
-    //     enemy.updateVelocity()
-    //     break
-    //   }
-    // }
+    for (const wall of walls.values()) {
+      if (isRectangleCollision(enemy, wall)) {
+        enemy.x -= enemy.velocityX
+        enemy.y -= enemy.velocityY
+
+        enemy.direction = getRandomDirection(DIRECTIONS)
+        enemy.updateVelocity()
+        break
+      }
+    }
   }
-
-  // for (const enemy of enemies.values()) {
-  //   enemy.x += enemy.velocityX
-  //   enemy.y += enemy.velocityY
-  // }
 }
 
 function update() {
